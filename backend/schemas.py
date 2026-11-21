@@ -145,6 +145,33 @@ class EvaluatedBiomarker(ExtractedBiomarker):
     )
 
 
+class DrugInteractionAlert(BaseModel):
+    severity: Literal["danger", "warning", "info"] = Field(
+        default="warning",
+        description="Clinical severity of the alert ('danger', 'warning', or 'info')",
+    )
+    alert_type: Literal["drug_interaction", "duplicate_ingredient", "food_or_lifestyle", "clinical_caution"] = Field(
+        default="drug_interaction",
+        description="Classification of the safety alert",
+    )
+    medicines_involved: List[str] = Field(
+        default_factory=list,
+        description="List of medicines or chemical salts triggering this alert",
+    )
+    title: str = Field(
+        ...,
+        description="Short high-contrast headline for the safety alert",
+    )
+    description: str = Field(
+        ...,
+        description="Clinical rationale explaining why these substances interact or duplicate",
+    )
+    action_recommendation: str = Field(
+        ...,
+        description="Actionable recommendation for the patient to verify with pharmacist or doctor",
+    )
+
+
 class VerifiedDocumentResult(BaseModel):
     document_type: Literal["prescription", "lab_report", "mixed"]
     patient_instructions: List[str]
@@ -154,6 +181,10 @@ class VerifiedDocumentResult(BaseModel):
     verified_medicines_count: int
     low_confidence_medicines_count: int
     flagged_biomarkers_count: int
+    drug_interactions: List[DrugInteractionAlert] = Field(
+        default_factory=list,
+        description="Clinical safety alerts including dangerous drug-drug interactions and duplicate active ingredients",
+    )
 
 
 # ============================================================================

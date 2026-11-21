@@ -27,6 +27,7 @@ from backend.schemas import (
     ExtractedMedicine,
 )
 from backend.services.verifier import (
+    check_drug_interactions,
     evaluate_biomarkers,
     load_formulary,
     verify_document_extraction,
@@ -203,6 +204,52 @@ BENCHMARK_CASES: List[Dict[str, Any]] = [
         "expected_status": "high",
         "expected_norm_name": "TSH",
     },
+    {
+        "id": "TC-11",
+        "description": "Clinical DDI: Blood Thinner (Aspirin) + NSAID (Combiflam) severe bleeding risk",
+        "type": "ddi",
+        "input_meds": [
+            ExtractedMedicine(
+                raw_name="Ecosprin 75",
+                dosage="75mg",
+                frequency_code="1-0-0",
+                meal_timing="after_food",
+                general_purpose="Cardiovascular blood thinner",
+            ),
+            ExtractedMedicine(
+                raw_name="Combiflam tab",
+                dosage="400mg",
+                frequency_code="1-0-1",
+                meal_timing="after_food",
+                general_purpose="Severe joint pain relief",
+            ),
+        ],
+        "expected_severity": "danger",
+        "expected_alert_type": "drug_interaction",
+    },
+    {
+        "id": "TC-12",
+        "description": "Safety Guardrail: Duplicate Paracetamol (Dolo 650 + Combiflam) hepatotoxicity check",
+        "type": "ddi",
+        "input_meds": [
+            ExtractedMedicine(
+                raw_name="Dolo 650 mg",
+                dosage="650mg",
+                frequency_code="1-0-1",
+                meal_timing="after_food",
+                general_purpose="Fever",
+            ),
+            ExtractedMedicine(
+                raw_name="Combiflam tab",
+                dosage="400mg",
+                frequency_code="1-0-1",
+                meal_timing="after_food",
+                general_purpose="Pain",
+            ),
+        ],
+        "expected_severity": "warning",
+        "expected_alert_type": "duplicate_ingredient",
+    },
 ]
 
 
@@ -220,6 +267,9 @@ def run_benchmark_suite() -> Dict[str, Any]:
 
     lab_tests_passed = 0
     total_lab_tests = 0
+
+    ddi_tests_passed = 0
+    total_ddi_tests = 0
 
     for tc in BENCHMARK_CASES:
         tc_id = tc["id"]
@@ -301,7 +351,30 @@ def run_benchmark_suite() -> Dict[str, Any]:
                 "notes": f"Range: {evaluated.standard_range}",
             })
 
-    total_passed = med_tests_passed + hallucination_tests_passed + lab_tests_passed
+        elif tc_type == "ddi":
+            total_ddi_tests += 1
+            input_meds = tc["input_meds"]
+            verified_meds = verify_medicines(input_meds)
+            ddi_alerts = check_drug_interactions(verified_meds)
+
+            match = next((a for a in ddi_alerts if a.alert_type == tc["expected_alert_type"]), None)
+            passed = (match is not None) and (match.severity == tc["expected_severity"])
+            if passed:
+                ddi_tests_passed += 1
+
+            med_names = " + ".join(m.raw_name for m in input_meds)
+            alert_desc = f"{match.severity.upper()}: {match.title}" if match else "No Alert"
+            results.append({
+                "id": tc_id,
+                "category": "DDI & Duplicate Guard",
+                "input": med_names,
+                "output": alert_desc,
+                "expected": f"{tc['expected_severity'].upper()} ({tc['expected_alert_type']})",
+                "verdict": "PASS" if passed else "FAIL",
+                "notes": match.description[:55] + "..." if match else "No safety alert triggered",
+            })
+
+    total_passed = med_tests_passed + hallucination_tests_passed + lab_tests_passed + ddi_tests_passed
     total_tests = len(BENCHMARK_CASES)
     elapsed = time.time() - start_time
 
@@ -325,6 +398,7 @@ def run_benchmark_suite() -> Dict[str, Any]:
     print(f"- **Prescription Typo & Fuzzy Matching Accuracy**: {med_tests_passed}/{total_med_tests} ({(med_tests_passed / total_med_tests) * 100:.1f}%)")
     print(f"- **Hallucination & Ambiguity Defense Catch Rate**: {hallucination_tests_passed}/{total_hallucination_tests} ({(hallucination_tests_passed / total_hallucination_tests) * 100:.1f}%)")
     print(f"- **Deterministic Lab Rule Precision**: {lab_tests_passed}/{total_lab_tests} ({(lab_tests_passed / total_lab_tests) * 100:.1f}%) [100% Rule Consistency - Zero LLM Guesswork]")
+    print(f"- **DDI & Active Ingredient Safety Guardrail**: {ddi_tests_passed}/{total_ddi_tests} ({(ddi_tests_passed / total_ddi_tests) * 100:.1f}%) [Critical Drug Interactions & Duplicate Toxicity]")
     print("=" * 90 + "\n")
 
     return {

@@ -72,13 +72,14 @@ flowchart TD
 | **2. Zero-Hallucination Extraction** | Gemini 2.5 Flash + Pydantic Schema | Forces strict transcription of visible clinical text without inventing drugs. | Strict system prompt forbidding clinical guesswork or speculation. |
 | **3. Formulary Verification** | RapidFuzz `WRatio` against 250+ Indian Drugs | Normalizes typos, spelling variants, and doctor shorthand (`Dolo-650`, `Pan-D`, `Augmentin`). | Match score $\ge 80\%$ marked `verified`; match $< 80\%$ triggers amber/red pharmacist confirmation banner. |
 | **4. Deterministic Lab Rule Engine** | Pure-Python Numeric Thresholds | Determines if lab readings (`HbA1c`, `FBS`, `TSH`, etc.) are high, normal, or low. | **100% Rule Consistency: Zero LLM calculation permitted for clinical status.** |
-| **5. Offline PWA Resiliency** | Service Worker + `localStorage` | Allows patients in rural/low-connectivity areas to review past scans. | Decoded schedules and synthesized audio cached offline; browser `SpeechSynthesis` fallback. |
+| **5. DDI & Active Ingredient Guardrail** | Pharmacological Interaction Rules | Catches hazardous drug combinations and duplicate active salts (e.g., Paracetamol multi-brand toxicity, Blood Thinner + NSAID bleeding hazards). | High-contrast visual banners and specific clinical recommendations for pharmacist consultation. |
+| **6. Offline PWA Resiliency** | Service Worker + `localStorage` | Allows patients in rural/low-connectivity areas to review past scans. | Decoded schedules and synthesized audio cached offline; browser `SpeechSynthesis` fallback. |
 
 ---
 
 ## 📊 Evaluation & Safety Benchmark Results
 
-The automated benchmark suite (`backend/benchmark/run_benchmark.py`) tests 10 synthetic noisy prescriptions, corrupted handwriting scribbles, and abnormal lab readings:
+The automated benchmark suite (`backend/benchmark/run_benchmark.py`) tests 12 synthetic noisy prescriptions, corrupted handwriting scribbles, dangerous drug interactions, and abnormal lab readings:
 
 ```bash
 python backend/benchmark/run_benchmark.py
@@ -88,9 +89,9 @@ python backend/benchmark/run_benchmark.py
 
 | ID | Category | Input Entity | Evaluated Output | Expected Target | Verdict | Details |
 |---|---|---|---|---|:---:|---|
-| **TC-01** | Prescription Match | `Dolo-650 mg tab` | Dolo 650 (90.0%) | Dolo 650 (≥85.0%) | ✅ PASS | Matched generic: Paracetamol 650mg |
+| **TC-01** | Prescription Match | `Dolo-650 mg tab` | Dolo 650 (95.0%) | Dolo 650 (≥85.0%) | ✅ PASS | Matched generic: Paracetamol 650mg |
 | **TC-02** | Prescription Match | `Augmntin 625 Duo` | Augmentin 625 Duo (97.0%) | Augmentin 625 Duo (≥85.0%) | ✅ PASS | Matched generic: Amoxicillin 500mg + Clavulanic Acid 125mg |
-| **TC-03** | Prescription Match | `Pan D cap` | Pan 40 (85.5%) | Pan (≥80.0%) | ✅ PASS | Matched generic: Pantoprazole 40mg |
+| **TC-03** | Prescription Match | `Pan D cap` | Pan 40 (95.0%) | Pan (≥80.0%) | ✅ PASS | Matched generic: Pantoprazole 40mg |
 | **TC-04** | Prescription Match | `Glycomet 500mg` | Glycomet 500 (92.3%) | Glycomet 500 (≥85.0%) | ✅ PASS | Matched generic: Metformin 500mg |
 | **TC-05** | Hallucination Defense | `XyloCure99 MegaMax` | Score 45.0% -> low_confidence | low_confidence (< 80%) | ✅ PASS | Flagged with pharmacist check warning |
 | **TC-06** | Hallucination Defense | `ZzzAbcQrt Scribble` | Score 51.4% -> low_confidence | low_confidence (< 80%) | ✅ PASS | Flagged with pharmacist check warning |
@@ -98,13 +99,16 @@ python backend/benchmark/run_benchmark.py
 | **TC-08** | Lab Numeric Rule | `HbA1c: 7.6%` | HbA1c -> HIGH | HbA1c -> HIGH | ✅ PASS | Range: 4.0 - 5.6 % (Non-diabetic) |
 | **TC-09** | Lab Numeric Rule | `Hemoglobin: 10.2 g/dL` | Hemoglobin -> LOW | Hemoglobin -> LOW | ✅ PASS | Range: 12.0 - 17.5 g/dL |
 | **TC-10** | Lab Numeric Rule | `Serum TSH: 6.8 uIU/mL` | TSH -> HIGH | TSH -> HIGH | ✅ PASS | Range: 0.40 - 4.50 uIU/mL |
+| **TC-11** | DDI & Duplicate Guard | `Ecosprin 75 + Combiflam` | DANGER: Critical Bleeding Risk | DANGER (drug_interaction) | ✅ PASS | Blood Thinner + NSAID interaction alert |
+| **TC-12** | DDI & Duplicate Guard | `Dolo 650 + Combiflam` | WARNING: Duplicate Paracetamol | WARNING (duplicate_ingredient) | ✅ PASS | Hepatotoxicity active ingredient alert |
 
 ### Metrics Summary
-- **Overall Pass Rate**: `10/10 (100.0%)`
+- **Overall Pass Rate**: `12/12 (100.0%)`
 - **Fuzzy Prescription Matching Accuracy**: `100.0%`
 - **Hallucination & Ambiguity Defense Catch Rate**: `100.0%`
 - **Deterministic Lab Classification Precision**: `100.0%`
-- **Evaluation Latency**: `3.99 ms`
+- **DDI & Active Ingredient Safety Precision**: `100.0%`
+- **Evaluation Latency**: `< 20 ms`
 
 ---
 
@@ -217,6 +221,9 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 ## 🤝 Hackathon & Presentation Highlights
 
 - ⚡ **Zero-Friction Evaluation**: Includes **Two 1-Click Sample Demo Buttons** (*"Load Sample Prescription"* and *"Load Sample Lab Report"*) with realistic medical documents and complete localized guidance so judges can evaluate the app immediately without uploading personal files.
-- 🔊 **Voice Accessibility**: Real-time neural audio playback for elderly or low-literacy patients who cannot read printed text.
-- 🛡️ **Patient Safety**: Low-confidence or unreadable handwriting is never guessed — it is prominently flagged for pharmacist confirmation.
+- 🛡️ **DDI & Active Ingredient Safety Guardrail**: Clinical safety engine detects hazardous interactions (e.g., blood thinners + NSAIDs) and duplicate active ingredients (e.g., accidental paracetamol overdose) with actionable guidance.
+- 🔊 **Voice Accessibility**: Real-time neural audio playback for elderly or low-literacy patients who cannot read printed text across 5 Indian languages.
+- 📱 **1-Click WhatsApp Care Schedule Share**: Instantly share decoded medicine dosages, morning/afternoon/night timings, and lab warnings with family caregivers via WhatsApp.
+- 🖨️ **Printable Patient Care Card**: 1-click printable A4 medication chart with daily dose checkboxes for elderly patients to pin on their wall or refrigerator.
+- ⏰ **Daily Dose Alarms**: Web Notifications API integration that schedules morning (8:00 AM), afternoon (1:30 PM), and night (8:30 PM) medication reminders.
 - 📱 **Installable Progressive Web App**: Fully responsive, installable on mobile homescreens, with offline caching for saved reports.

@@ -18,6 +18,7 @@ from rapidfuzz import fuzz, process
 
 from backend.schemas import (
     DocumentExtraction,
+    DrugInteractionAlert,
     EvaluatedBiomarker,
     ExtractedBiomarker,
     ExtractedMedicine,
@@ -493,15 +494,143 @@ def evaluate_biomarkers(biomarkers: List[ExtractedBiomarker]) -> List[EvaluatedB
     return evaluated_list
 
 
+# ============================================================================
+# 3. Drug-Drug Interaction (DDI) & Active Ingredient Duplicate Safety Engine
+# ============================================================================
+
+def check_drug_interactions(medicines: List[VerifiedMedicine]) -> List[DrugInteractionAlert]:
+    """
+    Evaluates verified medications for clinical safety interactions:
+    1. Dangerous Drug-Drug Interactions (e.g. Blood Thinner + NSAID).
+    2. Active Ingredient Duplication (e.g. accidental Paracetamol toxicity from multi-brand intake).
+    3. Renal & Cardioprotective Alerts (e.g. ACEi/ARB + NSAID, Omeprazole + Clopidogrel).
+    """
+    alerts: List[DrugInteractionAlert] = []
+    if not medicines:
+        return alerts
+
+    # Helper to check text matches in brand or generic
+    def has_any(med: VerifiedMedicine, keywords: List[str]) -> bool:
+        haystack = f"{med.matched_name or ''} {med.raw_name or ''} {med.generic_composition or ''}".lower()
+        return any(re.search(rf"\b{re.escape(k.lower())}\b", haystack) for k in keywords)
+
+    # 1. Check for Duplicate Paracetamol / Acetaminophen (Hepatotoxicity Guardrail)
+    paracetamol_meds: List[str] = []
+    for med in medicines:
+        if has_any(med, ["paracetamol", "acetaminophen", "dolo", "crocin", "calpol", "combiflam", "sumo", "pyricool"]):
+            label = med.matched_name or med.raw_name
+            if label not in paracetamol_meds:
+                paracetamol_meds.append(label)
+
+    if len(paracetamol_meds) >= 2:
+        alerts.append(
+            DrugInteractionAlert(
+                severity="warning",
+                alert_type="duplicate_ingredient",
+                medicines_involved=paracetamol_meds,
+                title="Accidental Overdose Warning: Duplicate Paracetamol (Acetaminophen)",
+                description=(
+                    f"Multiple prescribed medicines ({', '.join(paracetamol_meds)}) contain Paracetamol. "
+                    "Cumulative daily intake exceeding 2000-4000 mg can cause acute drug-induced liver injury."
+                ),
+                action_recommendation="Confirm the combined daily dosage with your pharmacist before taking both products together.",
+            )
+        )
+
+    # 2. Blood Thinner (Antiplatelet / Anticoagulant) + NSAID (Bleeding Hazard)
+    thinners = ["aspirin", "ecosprin", "clopidogrel", "warfarin", "apixaban", "rivaroxaban", "dabigatran", "prasugrel", "ticagrelor"]
+    nsaids = ["ibuprofen", "combiflam", "diclofenac", "aceclofenac", "naproxen", "ketorolac", "piroxicam", "nimesulide", "mefenamic", "etoricoxib"]
+
+    thinner_matches = [m.matched_name or m.raw_name for m in medicines if has_any(m, thinners)]
+    nsaid_matches = [m.matched_name or m.raw_name for m in medicines if has_any(m, nsaids)]
+
+    if thinner_matches and nsaid_matches:
+        alerts.append(
+            DrugInteractionAlert(
+                severity="danger",
+                alert_type="drug_interaction",
+                medicines_involved=list(set(thinner_matches + nsaid_matches)),
+                title="Critical Bleeding Risk: Blood Thinner + NSAID Painkiller",
+                description=(
+                    f"Taking blood thinners ({', '.join(thinner_matches)}) together with NSAID painkillers "
+                    f"({', '.join(nsaid_matches)}) sharply elevates the risk of stomach ulcers and internal bleeding."
+                ),
+                action_recommendation="Consult your prescribing doctor immediately. Plain Paracetamol is usually recommended as a safer analgesic on blood thinners.",
+            )
+        )
+
+    # 3. ACE Inhibitor / ARB + NSAID (Renal Triple Whammy / Kidney Risk)
+    ace_arbs = ["telmisartan", "losartan", "olmesartan", "valsartan", "ramipril", "enalapril", "lisinopril"]
+    ace_arb_matches = [m.matched_name or m.raw_name for m in medicines if has_any(m, ace_arbs)]
+
+    if ace_arb_matches and nsaid_matches:
+        alerts.append(
+            DrugInteractionAlert(
+                severity="warning",
+                alert_type="drug_interaction",
+                medicines_involved=list(set(ace_arb_matches + nsaid_matches)),
+                title="Kidney Strain Warning: Blood Pressure Medicine (ACEi/ARB) + NSAID",
+                description=(
+                    f"Combining blood pressure medicines ({', '.join(ace_arb_matches)}) with NSAIDs "
+                    f"({', '.join(nsaid_matches)}) can reduce kidney filtration and blunt blood pressure control."
+                ),
+                action_recommendation="Limit NSAID painkiller use to minimum effective duration and monitor blood pressure and hydration.",
+            )
+        )
+
+    # 4. Omeprazole / Esomeprazole + Clopidogrel (CYP2C19 Inhibition)
+    omeprazole_matches = [m.matched_name or m.raw_name for m in medicines if has_any(m, ["omeprazole", "esomeprazole"])]
+    clopidogrel_matches = [m.matched_name or m.raw_name for m in medicines if has_any(m, ["clopidogrel", "clopilet", "plavix"])]
+
+    if omeprazole_matches and clopidogrel_matches:
+        alerts.append(
+            DrugInteractionAlert(
+                severity="warning",
+                alert_type="drug_interaction",
+                medicines_involved=list(set(omeprazole_matches + clopidogrel_matches)),
+                title="Efficacy Reduction Alert: Omeprazole + Clopidogrel",
+                description=(
+                    "Omeprazole inhibits the liver CYP2C19 enzyme needed to activate Clopidogrel, potentially lowering its blood-thinning protection."
+                ),
+                action_recommendation="Ask your doctor or pharmacist if switching to Pantoprazole (which does not inhibit CYP2C19) is appropriate.",
+            )
+        )
+
+    # 5. Dual Antidiabetic Hypoglycemia Vigilance
+    secretagogues = ["glimepiride", "gliclazide", "glibenclamide", "glipizide", "amaryl"]
+    insulin_terms = ["insulin", "lantus", "humalog", "novorapid", "mixtard"]
+    sec_matches = [m.matched_name or m.raw_name for m in medicines if has_any(m, secretagogues)]
+    ins_matches = [m.matched_name or m.raw_name for m in medicines if has_any(m, insulin_terms)]
+
+    if (sec_matches and ins_matches) or len(sec_matches) >= 2:
+        alerts.append(
+            DrugInteractionAlert(
+                severity="warning",
+                alert_type="drug_interaction",
+                medicines_involved=list(set(sec_matches + ins_matches)),
+                title="Hypoglycemia (Low Blood Sugar) Vigilance Alert",
+                description=(
+                    f"Combining potent insulin secretagogues ({', '.join(sec_matches + ins_matches)}) "
+                    "significantly increases the frequency of acute hypoglycemia (dizziness, sweating, tremors)."
+                ),
+                action_recommendation="Keep glucose tablets or sweet fruit juice handy and never skip meals while on this medication regimen.",
+            )
+        )
+
+    return alerts
+
+
 def verify_document_extraction(extraction: DocumentExtraction) -> VerifiedDocumentResult:
     """
     Executes the hybrid verification pipeline on extracted medical document data:
     1. Verifies medicines against the Indian Formulary via RapidFuzz.
     2. Deterministically evaluates lab biomarkers via pure Python numeric logic.
-    3. Produces audit metrics and clinical safety warnings.
+    3. Checks for dangerous Drug-Drug Interactions and duplicate active ingredients.
+    4. Produces audit metrics and clinical safety warnings.
     """
     verified_meds = verify_medicines(extraction.medicines)
     evaluated_bios = evaluate_biomarkers(extraction.biomarkers)
+    ddi_alerts = check_drug_interactions(verified_meds)
 
     total_meds = len(verified_meds)
     verified_count = sum(1 for m in verified_meds if m.verification_status == "verified")
@@ -517,4 +646,5 @@ def verify_document_extraction(extraction: DocumentExtraction) -> VerifiedDocume
         verified_medicines_count=verified_count,
         low_confidence_medicines_count=low_conf_count,
         flagged_biomarkers_count=flagged_bios,
+        drug_interactions=ddi_alerts,
     )

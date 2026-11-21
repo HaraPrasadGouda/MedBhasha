@@ -253,7 +253,17 @@ export function getSamplePrescriptionData(language = 'hi') {
           warning: 'Low handwriting/match confidence — confirm with pharmacist before taking'
         }
       ],
-      biomarkers: []
+      biomarkers: [],
+      drug_interactions: [
+        {
+          severity: 'info',
+          alert_type: 'food_or_lifestyle',
+          medicines_involved: ['Pan-D', 'Augmentin 625 Duo'],
+          title: 'Timing Optimization: Antibiotic & Antacid Absorption',
+          description: 'Take Pan-D strictly 30 minutes before breakfast on an empty stomach. Take Augmentin 625 Duo after food to minimize gastric discomfort.',
+          action_recommendation: 'Maintain a 60-minute interval between your empty-stomach antacid and antibiotic dose for optimal bioavailability.'
+        }
+      ]
     },
     localized_guidance: {
       language: language,
@@ -419,7 +429,8 @@ export function getSampleLabReportData(language = 'hi') {
           status: 'high',
           interpretation: 'Elevated TSH (> 4.50 uIU/mL). Suggests primary hypothyroidism.'
         }
-      ]
+      ],
+      drug_interactions: []
     },
     localized_guidance: {
       language: language,

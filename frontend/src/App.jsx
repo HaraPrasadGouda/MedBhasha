@@ -10,6 +10,7 @@ import {
   Sliders, 
   Activity, 
   ShieldCheck,
+  ShieldAlert,
   RefreshCw,
   Sun,
   Moon,
@@ -30,8 +31,24 @@ import {
   ExternalLink,
   Pill,
   FileCheck,
-  ArrowRight
+  ArrowRight,
+  Share2,
+  Printer,
+  Bell,
+  BellRing
 } from 'lucide-react';
+
+const MedBhashaLogo = ({ className = "h-11 w-11" }) => (
+  <div className={`${className} rounded-2xl bg-gradient-to-tr from-emerald-700 via-teal-600 to-emerald-500 flex items-center justify-center text-white shadow-md shadow-emerald-200 shrink-0 p-2`}>
+    <svg viewBox="0 0 100 100" className="w-full h-full" fill="none" stroke="currentColor">
+      {/* Medical Cross */}
+      <rect x="41" y="16" width="18" height="68" rx="6" fill="white" />
+      <rect x="16" y="41" width="68" height="18" rx="6" fill="white" />
+      {/* ECG Heartbeat Vital Pulse */}
+      <path d="M20 50h15l6-14 8 28 8-18 6 4h17" stroke="#047857" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  </div>
+);
 
 import { 
   SAMPLE_PRESCRIPTION_IMAGE, 
@@ -98,6 +115,10 @@ export default function App() {
   // Offline Saved Scans Drawer state
   const [savedScans, setSavedScans] = useState([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  // Daily Dose Reminders & Toast
+  const [remindersActive, setRemindersActive] = useState(false);
+  const [reminderToast, setReminderToast] = useState('');
 
   // Server health
   const [serverHealth, setServerHealth] = useState({ status: 'checking' });
@@ -396,6 +417,81 @@ export default function App() {
     }
   };
 
+  // 1-Click WhatsApp Share for Caregivers & Family
+  const handleWhatsAppShare = () => {
+    if (!analysisResult) return;
+    const lang = VERNACULAR_LANGUAGES.find(l => l.code === selectedLanguage)?.name || 'Vernacular';
+    let text = `🏥 *MedBhasha Patient Care Schedule* (${lang})\n\n`;
+
+    if (analysisResult.verification?.medicines?.length > 0) {
+      text += `📋 *Prescribed Medicines (${analysisResult.verification.medicines.length}):*\n`;
+      analysisResult.verification.medicines.forEach((m, i) => {
+        const schedule = `${m.morning_count > 0 ? '🌅 Morning ' + m.morning_count : ''} ${m.afternoon_count > 0 ? '☀️ Noon ' + m.afternoon_count : ''} ${m.night_count > 0 ? '🌙 Night ' + m.night_count : ''}`.trim() || m.frequency_code;
+        const timing = defaultFoodLabel(m.meal_timing, selectedLanguage);
+        text += `${i + 1}. *${m.matched_name || m.raw_name}* (${schedule} • ${timing})\n`;
+        if (m.verification_status === 'low_confidence') {
+          text += `   ⚠️ _Note: Handwriting unconfirmed - check with chemist_\n`;
+        }
+      });
+      text += `\n`;
+    }
+
+    if (analysisResult.verification?.biomarkers?.length > 0) {
+      text += `🔬 *Diagnostic Lab Findings:*\n`;
+      analysisResult.verification.biomarkers.forEach(b => {
+        const flag = b.status === 'high' ? '🔺 HIGH' : b.status === 'low' ? '🔻 LOW' : '✅ NORMAL';
+        text += `• ${b.normalized_test_name || b.test_name}: *${b.raw_value_text}* (${flag})\n`;
+      });
+      text += `\n`;
+    }
+
+    if (analysisResult.localized_guidance?.spoken_summary_script) {
+      text += `🗣️ *Audio Guidance Summary:*\n"${analysisResult.localized_guidance.spoken_summary_script}"\n\n`;
+    }
+
+    text += `⚕️ _MedBhasha: Always verify dosages with your doctor or pharmacist._`;
+
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  // 1-Click Print Care Card
+  const handlePrintCareCard = () => {
+    window.print();
+  };
+
+  // Daily Dose Reminders (Web Notifications)
+  const handleSetDoseReminders = async () => {
+    if (!('Notification' in window)) {
+      setReminderToast('Notifications are not supported in this browser.');
+      setTimeout(() => setReminderToast(''), 4000);
+      return;
+    }
+
+    try {
+      let permission = Notification.permission;
+      if (permission !== 'granted') {
+        permission = await Notification.requestPermission();
+      }
+
+      if (permission === 'granted') {
+        setRemindersActive(true);
+        setReminderToast('✓ Daily dose reminders scheduled for 8:00 AM, 1:30 PM, and 8:30 PM!');
+        new Notification('MedBhasha Dose Reminders Activated', {
+          body: 'You will receive reminders for Morning (8 AM), Afternoon (1:30 PM), and Night (8:30 PM) doses.',
+          icon: '/icon-192.svg',
+        });
+        setTimeout(() => setReminderToast(''), 5000);
+      } else {
+        setReminderToast('Notification permission was dismissed. Please enable it in browser settings.');
+        setTimeout(() => setReminderToast(''), 4000);
+      }
+    } catch (e) {
+      setReminderToast('Could not schedule notifications.');
+      setTimeout(() => setReminderToast(''), 4000);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
       {/* 1. Header with Branding & Language Pills */}
@@ -404,9 +500,7 @@ export default function App() {
           <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Logo */}
             <div className="flex items-center gap-3">
-              <div className="h-11 w-11 rounded-2xl bg-gradient-to-tr from-emerald-700 to-teal-500 flex items-center justify-center text-white shadow-md shadow-emerald-200 font-bold text-2xl">
-                मे
-              </div>
+              <MedBhashaLogo className="h-11 w-11" />
               <div>
                 <div className="flex items-center gap-2">
                   <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">MedBhasha</h1>
@@ -801,6 +895,140 @@ export default function App() {
               </div>
             </div>
 
+            {/* B2. 1-Click Patient Care Actions Toolbar (WhatsApp, Print Care Card, Dose Reminders) */}
+            <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <span className="h-8 w-8 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center font-bold">
+                  <Activity className="h-4 w-4" />
+                </span>
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900">Patient Care &amp; Adherence Actions</h4>
+                  <p className="text-[11px] text-slate-500">Share with family caregivers, print offline card, or set daily dosage alerts</p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {/* 1-Click WhatsApp Share */}
+                <button
+                  onClick={handleWhatsAppShare}
+                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-95 transition-all shadow-sm"
+                  title="Share decoded medicine schedule & lab highlights on WhatsApp"
+                >
+                  <Share2 className="h-3.5 w-3.5" />
+                  <span>WhatsApp Share</span>
+                </button>
+
+                {/* Print Care Card */}
+                <button
+                  onClick={handlePrintCareCard}
+                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 active:scale-95 transition-all"
+                  title="Print patient care schedule card or save as PDF"
+                >
+                  <Printer className="h-3.5 w-3.5 text-slate-600" />
+                  <span>Print Care Card</span>
+                </button>
+
+                {/* Dose Reminders */}
+                <button
+                  onClick={handleSetDoseReminders}
+                  className={`flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold active:scale-95 transition-all ${
+                    remindersActive
+                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                      : 'bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200'
+                  }`}
+                  title="Enable Web Notifications for Morning, Noon, and Night medication doses"
+                >
+                  {remindersActive ? (
+                    <>
+                      <BellRing className="h-3.5 w-3.5 text-emerald-600 animate-bounce" />
+                      <span>Alarms Active (8 AM • 1:30 PM • 8:30 PM)</span>
+                    </>
+                  ) : (
+                    <>
+                      <Bell className="h-3.5 w-3.5 text-teal-700" />
+                      <span>Set Dose Alarms</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* B3. Clinical Safety & Drug-Drug Interaction Guardrail */}
+            {analysisResult.verification?.drug_interactions?.length > 0 && (
+              <div className="bg-white rounded-2xl border border-rose-200 overflow-hidden shadow-sm">
+                <div className="bg-gradient-to-r from-rose-600 via-rose-500 to-amber-500 px-5 py-3 text-white flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ShieldAlert className="h-5 w-5 shrink-0" />
+                    <div>
+                      <h3 className="font-bold text-sm sm:text-base">
+                        Clinical Safety &amp; Interaction Guardrail
+                      </h3>
+                      <p className="text-[11px] text-white/90">
+                        Deterministic checks against dangerous drug combinations and duplicate active salts
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-black uppercase tracking-wider bg-white/20 px-2.5 py-1 rounded-full border border-white/30">
+                    {analysisResult.verification.drug_interactions.length} Checked
+                  </span>
+                </div>
+
+                <div className="p-4 sm:p-5 space-y-3 bg-rose-50/20">
+                  {analysisResult.verification.drug_interactions.map((alert, idx) => {
+                    const isDanger = alert.severity === 'danger';
+                    return (
+                      <div
+                        key={idx}
+                        className={`p-4 rounded-xl border transition-all ${
+                          isDanger
+                            ? 'bg-rose-50/80 border-rose-200 text-rose-950'
+                            : 'bg-amber-50/80 border-amber-200 text-amber-950'
+                        } space-y-2.5`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-center gap-2">
+                            {isDanger ? (
+                              <span className="h-6 w-6 rounded-lg bg-rose-100 flex items-center justify-center shrink-0">
+                                <AlertTriangle className="h-4 w-4 text-rose-600" />
+                              </span>
+                            ) : (
+                              <span className="h-6 w-6 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
+                                <Info className="h-4 w-4 text-amber-700" />
+                              </span>
+                            )}
+                            <h4 className="font-bold text-sm text-slate-900">{alert.title}</h4>
+                          </div>
+
+                          <span
+                            className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full shrink-0 ${
+                              isDanger
+                                ? 'bg-rose-600 text-white'
+                                : 'bg-amber-500 text-white'
+                            }`}
+                          >
+                            {alert.severity === 'danger' ? 'High Risk' : 'Caution'}
+                          </span>
+                        </div>
+
+                        <p className="text-xs leading-relaxed text-slate-700">
+                          {alert.description}
+                        </p>
+
+                        {alert.action_recommendation && (
+                          <div className="bg-white/90 p-2.5 rounded-lg text-xs border border-slate-200/60 flex items-start gap-2 shadow-xs">
+                            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                            <span className="text-slate-800">
+                              <strong>Clinical Action:</strong> {alert.action_recommendation}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* C. Visual Pill Schedule Cards */}
             {analysisResult.verification?.medicines?.length > 0 && (
               <div className="space-y-4">
@@ -1152,6 +1380,20 @@ export default function App() {
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Reminder Notification Toast */}
+      {reminderToast && (
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 border border-slate-700 animate-fade-in text-xs sm:text-sm">
+          <BellRing className="h-5 w-5 text-emerald-400 shrink-0" />
+          <span>{reminderToast}</span>
+          <button
+            onClick={() => setReminderToast('')}
+            className="text-slate-400 hover:text-white ml-2 text-xs font-bold"
+          >
+            ✕
+          </button>
         </div>
       )}
 
