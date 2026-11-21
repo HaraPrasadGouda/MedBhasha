@@ -23,13 +23,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # Copy dependency specifications first to leverage Docker layer caching
-COPY backend/requirements.txt ./backend/requirements.txt
+# (Build context is the backend/ directory, so files are at the root of context.)
+COPY requirements.txt ./backend/requirements.txt
 
 # Install python dependencies
 RUN pip install --no-cache-dir -r ./backend/requirements.txt
 
-# Copy backend codebase
-COPY backend/ ./backend/
+# Copy backend codebase into /app/backend so `backend.main:app` resolves
+COPY . ./backend/
 
 # Create non-root user for security compliance (required by Hugging Face Spaces)
 RUN useradd -m -u 1000 appuser && \
