@@ -113,20 +113,25 @@ export default function App() {
       console.warn('Failed to load saved scans from localStorage:', e);
     }
     checkHealth();
+    const interval = setInterval(checkHealth, 25000);
+    return () => clearInterval(interval);
   }, []);
 
   const checkHealth = async () => {
-    try {
-      const res = await fetch(`${API_BASE_URL}/health`);
-      if (res.ok) {
-        const data = await res.json();
-        setServerHealth({ status: 'online', ...data });
-      } else {
-        setServerHealth({ status: 'offline' });
+    for (let attempt = 0; attempt < 4; attempt++) {
+      try {
+        const res = await fetch(`${API_BASE_URL}/health`);
+        if (res.ok) {
+          const data = await res.json();
+          setServerHealth({ status: 'online', ...data });
+          return;
+        }
+      } catch (e) {
+        console.warn('Health check attempt failed:', e);
       }
-    } catch {
-      setServerHealth({ status: 'offline' });
+      await delay(1500);
     }
+    setServerHealth({ status: 'offline' });
   };
 
   // Save scan to localStorage (strip heavy preview payloads to avoid quota errors)
