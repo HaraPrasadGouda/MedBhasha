@@ -5,22 +5,6 @@
 
 ---
 
-## 🎥 90-Second Product Demo Video (1080p MP4)
-
-A complete, synchronized 90-second product demo video has been generated and is included directly in the repository root: **`medbhasha_product_demo_90s.mp4`** (1920x1080 @ 30fps with English voiceover, Hindi & Odia neural audio demonstrations, ambient background music, and bilingual subtitles).
-
-- **Direct File Link**: [medbhasha_product_demo_90s.mp4](file:///c:/Users/LENOVO/Downloads/innovate%20india/medbhasha_product_demo_90s.mp4)
-- **Video Breakdown (90 Seconds)**:
-  1. **Scene 1 (0–10s)**: Title Card & Mission — *MedBhasha: Understand Your Prescription in Your Mother Tongue* with glowing logo `मे`.
-  2. **Scene 2 (10–25s)**: The Crisis — Blurry doctor handwriting photo, cryptic abbreviations (`BD? SOS? PC?`), and the *"65% of patients cannot read prescriptions"* statistic.
-  3. **Scene 3 (25–45s)**: The Prescription Solution — 1-Click sample load, visual pill schedule cards (🌅 Morning, ☀️ Afternoon, 🌙 Night), and the red *"⚠️ Confirm with Chemist"* safety card for illegible handwriting.
-  4. **Scene 4 (45–60s)**: Multilingual Voice Accessibility — Live audio player banner with animated waveforms playing neural Hindi speech, switching dynamically to Odia with localized schedules.
-  5. **Scene 5 (60–75s)**: Pathology Lab Panel Decoder — Fasting Blood Sugar & HbA1c flagged **HIGH (Red)**, Hemoglobin **LOW (Amber)**, Creatinine **NORMAL (Green)** with 3-segment color range bars.
-  6. **Scene 6 (75–85s)**: Deterministic Clinical Trust — Pure Python numeric comparisons (zero LLM guesswork), RapidFuzz verification against 256 Indian formulary drugs.
-  7. **Scene 7 (85–90s)**: Outro & Call-to-Action — *"No installs. Works offline. 100% Free."* with links to `med-bhasha.vercel.app` and GitHub repository.
-
----
-
 ## 📌 Problem Statement & Clinical Motivation
 
 In India and across South Asia, over **65% of patients struggle to decipher handwritten prescriptions** due to rapid physician shorthand, illegible scribbles, and complex Latin frequency notations (`1-0-1`, `TDS`, `BD`, `SOS`, `HS`). Furthermore:
