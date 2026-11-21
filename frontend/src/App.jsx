@@ -123,7 +123,7 @@ export default function App() {
         const res = await fetch(`${API_BASE_URL}/health`);
         if (res.ok) {
           const data = await res.json();
-          setServerHealth({ status: 'online', ...data });
+          setServerHealth({ ...data, status: 'online' });
           return;
         }
       } catch (e) {
