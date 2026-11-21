@@ -1,0 +1,258 @@
+brand_or_generic_name,generic_composition,category
+Metformin,Metformin Hydrochloride,Antidiabetic
+Glycomet 500,Metformin 500mg,Antidiabetic
+Glycomet 850,Metformin 850mg,Antidiabetic
+Glycomet GP 1,Glimepiride 1mg + Metformin 500mg,Antidiabetic
+Glycomet GP 2,Glimepiride 2mg + Metformin 500mg,Antidiabetic
+Glimepiride,Glimepiride,Antidiabetic
+Amaryl 1mg,Glimepiride 1mg,Antidiabetic
+Amaryl 2mg,Glimepiride 2mg,Antidiabetic
+Teneligliptin,Teneligliptin Hydrobromide,Antidiabetic
+Ziten 20,Teneligliptin 20mg,Antidiabetic
+Vildagliptin,Vildagliptin,Antidiabetic
+Galvus 50,Vildagliptin 50mg,Antidiabetic
+Galvus Met,Vildagliptin 50mg + Metformin 500mg,Antidiabetic
+Sitagliptin,Sitagliptin Phosphate,Antidiabetic
+Januvia 100,Sitagliptin 100mg,Antidiabetic
+Janumet,Sitagliptin 50mg + Metformin 500mg,Antidiabetic
+Dapagliflozin,Dapagliflozin Propanediol,Antidiabetic
+Forxiga 10,Dapagliflozin 10mg,Antidiabetic
+Empagliflozin,Empagliflozin,Antidiabetic
+Jardiance 10,Empagliflozin 10mg,Antidiabetic
+Jardiance 25,Empagliflozin 25mg,Antidiabetic
+Voglibose,Voglibose,Antidiabetic
+Volibo 0.2,Voglibose 0.2mg,Antidiabetic
+Volibo 0.3,Voglibose 0.3mg,Antidiabetic
+Pioglitazone,Pioglitazone Hydrochloride,Antidiabetic
+Pioz 15,Pioglitazone 15mg,Antidiabetic
+Rybelsus 3mg,Semaglutide 3mg,Antidiabetic
+Rybelsus 7mg,Semaglutide 7mg,Antidiabetic
+Rybelsus 14mg,Semaglutide 14mg,Antidiabetic
+Atorvastatin,Atorvastatin Calcium,Lipid Lowering
+Atorva 10,Atorvastatin 10mg,Lipid Lowering
+Atorva 20,Atorvastatin 20mg,Lipid Lowering
+Atorva 40,Atorvastatin 40mg,Lipid Lowering
+Storvas 10,Atorvastatin 10mg,Lipid Lowering
+Storvas 20,Atorvastatin 20mg,Lipid Lowering
+Rosuvastatin,Rosuvastatin Calcium,Lipid Lowering
+Rosuvas 5,Rosuvastatin 5mg,Lipid Lowering
+Rosuvas 10,Rosuvastatin 10mg,Lipid Lowering
+Rosuvas 20,Rosuvastatin 20mg,Lipid Lowering
+Rozavel 10,Rosuvastatin 10mg,Lipid Lowering
+Fenofibrate,Fenofibrate,Lipid Lowering
+Lipicard 160,Fenofibrate Micronised 160mg,Lipid Lowering
+Ezetimibe,Ezetimibe,Lipid Lowering
+Ecosprin 75,Aspirin 75mg,Antiplatelet
+Ecosprin 150,Aspirin 150mg,Antiplatelet
+Ecosprin AV 75,Aspirin 75mg + Atorvastatin 10mg,Cardiovascular
+Ecosprin Gold 10,Aspirin 75mg + Clopidogrel 75mg + Atorvastatin 10mg,Cardiovascular
+Clopidogrel,Clopidogrel Bisulfate,Antiplatelet
+Deplatt 75,Clopidogrel 75mg,Antiplatelet
+Clavix 75,Clopidogrel 75mg,Antiplatelet
+Brilinta 90,Ticagrelor 90mg,Antiplatelet
+Eliquis 2.5,Apixaban 2.5mg,Anticoagulant
+Eliquis 5,Apixaban 5mg,Anticoagulant
+Xarelto 10,Rivaroxaban 10mg,Anticoagulant
+Xarelto 15,Rivaroxaban 15mg,Anticoagulant
+Xarelto 20,Rivaroxaban 20mg,Anticoagulant
+Telmisartan,Telmisartan,Antihypertensive
+Telma 20,Telmisartan 20mg,Antihypertensive
+Telma 40,Telmisartan 40mg,Antihypertensive
+Telma 80,Telmisartan 80mg,Antihypertensive
+Telma-H,Telmisartan 40mg + Hydrochlorothiazide 12.5mg,Antihypertensive
+Telma-AM,Telmisartan 40mg + Amlodipine 5mg,Antihypertensive
+Telmikind 40,Telmisartan 40mg,Antihypertensive
+Amlodipine,Amlodipine Besylate,Antihypertensive
+Stamlo 2.5,Amlodipine 2.5mg,Antihypertensive
+Stamlo 5,Amlodipine 5mg,Antihypertensive
+Amlong 5,Amlodipine 5mg,Antihypertensive
+Cilnidipine,Cilnidipine,Antihypertensive
+Cilacar 5,Cilnidipine 5mg,Antihypertensive
+Cilacar 10,Cilnidipine 10mg,Antihypertensive
+Cilacar 20,Cilnidipine 20mg,Antihypertensive
+Cilacar-T,Cilnidipine 10mg + Telmisartan 40mg,Antihypertensive
+Losartan,Losartan Potassium,Antihypertensive
+Repace 25,Losartan 25mg,Antihypertensive
+Repace 50,Losartan 50mg,Antihypertensive
+Repace-H,Losartan 50mg + Hydrochlorothiazide 12.5mg,Antihypertensive
+Olmesartan,Olmesartan Medoxomil,Antihypertensive
+Olvance 20,Olmesartan 20mg,Antihypertensive
+Olvance 40,Olmesartan 40mg,Antihypertensive
+Metoprolol Succinate,Metoprolol Succinate,Antihypertensive
+Betaloc 25,Metoprolol Succinate 25mg,Antihypertensive
+Betaloc 50,Metoprolol Succinate 50mg,Antihypertensive
+Metolar XR 25,Metoprolol Tartrate 25mg,Antihypertensive
+Metolar XR 50,Metoprolol Tartrate 50mg,Antihypertensive
+Atenolol,Atenolol,Antihypertensive
+Aten 25,Atenolol 25mg,Antihypertensive
+Aten 50,Atenolol 50mg,Antihypertensive
+Nebivolol,Nebivolol Hydrochloride,Antihypertensive
+Nebicard 2.5,Nebivolol 2.5mg,Antihypertensive
+Nebicard 5,Nebivolol 5mg,Antihypertensive
+Ramipril,Ramipril,Antihypertensive
+Cardace 2.5,Ramipril 2.5mg,Antihypertensive
+Cardace 5,Ramipril 5mg,Antihypertensive
+Enalapril,Enalapril Maleate,Antihypertensive
+Envas 5,Enalapril 5mg,Antihypertensive
+Torsemide,Torsemide,Diuretic
+Dytor 5,Torsemide 5mg,Diuretic
+Dytor 10,Torsemide 10mg,Diuretic
+Dytor Plus 10,Torsemide 10mg + Spironolactone 50mg,Diuretic
+Lasix 40,Furosemide 40mg,Diuretic
+Aldactone 25,Spironolactone 25mg,Diuretic
+Pantoprazole,Pantoprazole Sodium,Gastrointestinal
+Pan 40,Pantoprazole 40mg,Gastrointestinal
+Pantocid 40,Pantoprazole 40mg,Gastrointestinal
+Pan-D,Pantoprazole 40mg + Domperidone 30mg,Gastrointestinal
+Pantocid-D,Pantoprazole 40mg + Domperidone 30mg,Gastrointestinal
+Pantocid-DSR,Pantoprazole 40mg + Domperidone 30mg SR,Gastrointestinal
+Rabeprazole,Rabeprazole Sodium,Gastrointestinal
+Razo 20,Rabeprazole 20mg,Gastrointestinal
+Razo-D,Rabeprazole 20mg + Domperidone 30mg,Gastrointestinal
+Happi 20,Rabeprazole 20mg,Gastrointestinal
+Omeprazole,Omeprazole,Gastrointestinal
+Omez 20,Omeprazole 20mg,Gastrointestinal
+Omez-D,Omeprazole 20mg + Domperidone 10mg,Gastrointestinal
+Esomeprazole,Esomeprazole Magnesium,Gastrointestinal
+Nexpro 20,Esomeprazole 20mg,Gastrointestinal
+Nexpro 40,Esomeprazole 40mg,Gastrointestinal
+Nexpro-RD 40,Esomeprazole 40mg + Domperidone 30mg,Gastrointestinal
+Sucralfate,Sucralfate,Gastrointestinal
+Sucrafil Suspension,Sucralfate 1000mg/5ml,Gastrointestinal
+Ondansetron,Ondansetron Hydrochloride,Antiemetic
+Emeset 4,Ondansetron 4mg,Antiemetic
+Emeset 8,Ondansetron 8mg,Antiemetic
+Domperidone,Domperidone,Antiemetic
+Vomitop,Domperidone 10mg,Antiemetic
+Paracetamol,Paracetamol,Analgesic / Antipyretic
+Dolo 650,Paracetamol 650mg,Analgesic / Antipyretic
+Calpol 500,Paracetamol 500mg,Analgesic / Antipyretic
+Calpol 650,Paracetamol 650mg,Analgesic / Antipyretic
+Crocin 650,Paracetamol 650mg,Analgesic / Antipyretic
+Crocin Advance,Paracetamol 500mg Fast Release,Analgesic / Antipyretic
+Ibuprofen,Ibuprofen,Analgesic / NSAID
+Combiflam,Ibuprofen 400mg + Paracetamol 325mg,Analgesic / NSAID
+Aceclofenac,Aceclofenac,Analgesic / NSAID
+Zerodol 100,Aceclofenac 100mg,Analgesic / NSAID
+Zerodol-P,Aceclofenac 100mg + Paracetamol 325mg,Analgesic / NSAID
+Zerodol-SP,Aceclofenac 100mg + Paracetamol 325mg + Serratiopeptidase 15mg,Analgesic / Anti-inflammatory
+Hifenac-P,Aceclofenac 100mg + Paracetamol 325mg,Analgesic / NSAID
+Diclofenac,Diclofenac Sodium,Analgesic / NSAID
+Voveran 50,Diclofenac Sodium 50mg,Analgesic / NSAID
+Voveran SR 75,Diclofenac Sodium 75mg SR,Analgesic / NSAID
+Voveran SR 100,Diclofenac Sodium 100mg SR,Analgesic / NSAID
+Mefenamic Acid,Mefenamic Acid,Analgesic / Antispasmodic
+Meftal-Spas,Mefenamic Acid 250mg + Dicyclomine 10mg,Analgesic / Antispasmodic
+Etoricoxib,Etoricoxib,Analgesic / NSAID
+Nucoxia 60,Etoricoxib 60mg,Analgesic / NSAID
+Nucoxia 90,Etoricoxib 90mg,Analgesic / NSAID
+Tramadol,Tramadol Hydrochloride,Analgesic
+Ultracet,Tramadol 37.5mg + Paracetamol 325mg,Analgesic
+Amoxicillin + Clavulanic Acid,Amoxicillin + Clavulanate Potassium,Antibiotic
+Augmentin 625 Duo,Amoxicillin 500mg + Clavulanic Acid 125mg,Antibiotic
+Augmentin 1000,Amoxicillin 875mg + Clavulanic Acid 125mg,Antibiotic
+Moxikind-CV 625,Amoxicillin 500mg + Clavulanic Acid 125mg,Antibiotic
+Clavam 625,Amoxicillin 500mg + Clavulanic Acid 125mg,Antibiotic
+Azithromycin,Azithromycin Dihydrate,Antibiotic
+Azee 250,Azithromycin 250mg,Antibiotic
+Azee 500,Azithromycin 500mg,Antibiotic
+Azithral 500,Azithromycin 500mg,Antibiotic
+Cefixime,Cefixime Trihydrate,Antibiotic
+Taxim-O 200,Cefixime 200mg,Antibiotic
+Zifi 200,Cefixime 200mg,Antibiotic
+Mahacef 200,Cefixime 200mg,Antibiotic
+Cefpodoxime,Cefpodoxime Proxetil,Antibiotic
+Doxcef 200,Cefpodoxime 200mg,Antibiotic
+Monocef-O 200,Cefpodoxime 200mg,Antibiotic
+Ciprofloxacin,Ciprofloxacin Hydrochloride,Antibiotic
+Ciplox 500,Ciprofloxacin 500mg,Antibiotic
+Levofloxacin,Levofloxacin Hemihydrate,Antibiotic
+Levomac 500,Levofloxacin 500mg,Antibiotic
+Loxof 500,Levofloxacin 500mg,Antibiotic
+Ofloxacin,Ofloxacin,Antibiotic
+Oflox 200,Ofloxacin 200mg,Antibiotic
+Zenflox 200,Ofloxacin 200mg,Antibiotic
+Oflox-OZ,Ofloxacin 200mg + Ornidazole 500mg,Antibiotic
+Metronidazole,Metronidazole,Antiprotozoal / Antibiotic
+Flagyl 400,Metronidazole 400mg,Antiprotozoal / Antibiotic
+Doxycycline,Doxycycline Hyclate,Antibiotic
+Doxypal 100,Doxycycline 100mg,Antibiotic
+Linezolid,Linezolid,Antibiotic
+Lizomac 600,Linezolid 600mg,Antibiotic
+Linid 600,Linezolid 600mg,Antibiotic
+Nitrofurantoin,Nitrofurantoin,Antibiotic
+Niftran 100,Nitrofurantoin 100mg,Antibiotic
+Montelukast,Montelukast Sodium,Respiratory / Antiallergic
+Montair 10,Montelukast 10mg,Respiratory / Antiallergic
+Montair-LC,Montelukast 10mg + Levocetirizine 5mg,Respiratory / Antiallergic
+Montek-LC,Montelukast 10mg + Levocetirizine 5mg,Respiratory / Antiallergic
+Levocetirizine,Levocetirizine Dihydrochloride,Antihistamine
+Levocet 5,Levocetirizine 5mg,Antihistamine
+1-AL 5,Levocetirizine 5mg,Antihistamine
+Cetirizine,Cetirizine Hydrochloride,Antihistamine
+Cetzine 10,Cetirizine 10mg,Antihistamine
+Alerid 10,Cetirizine 10mg,Antihistamine
+Bilastine,Bilastine,Antihistamine
+Bilashine 20,Bilastine 20mg,Antihistamine
+Bilaxten 20,Bilastine 20mg,Antihistamine
+Fexofenadine,Fexofenadine Hydrochloride,Antihistamine
+Allegra 120,Fexofenadine 120mg,Antihistamine
+Allegra 180,Fexofenadine 180mg,Antihistamine
+Budesonide + Formoterol,Budesonide + Formoterol Fumarate,Respiratory / Inhaler
+Foracort 200 Inhaler,Budesonide 200mcg + Formoterol 6mcg,Respiratory / Inhaler
+Foracort 400 Inhaler,Budesonide 400mcg + Formoterol 6mcg,Respiratory / Inhaler
+Asthalin Inhaler,Salbutamol 100mcg,Respiratory / Bronchodilator
+Duolin Inhaler,Levosalbutamol 50mcg + Ipratropium 20mcg,Respiratory / Bronchodilator
+Deriphyllin,Theophylline + Etofylline,Respiratory / Bronchodilator
+Thyronorm 25,Levothyroxine Sodium 25mcg,Thyroid
+Thyronorm 50,Levothyroxine Sodium 50mcg,Thyroid
+Thyronorm 75,Levothyroxine Sodium 75mcg,Thyroid
+Thyronorm 100,Levothyroxine Sodium 100mcg,Thyroid
+Thyronorm 125,Levothyroxine Sodium 125mcg,Thyroid
+Eltroxin 50,Levothyroxine Sodium 50mcg,Thyroid
+Eltroxin 100,Levothyroxine Sodium 100mcg,Thyroid
+Levothyroxine,Levothyroxine Sodium,Thyroid
+Carbimazole,Carbimazole,Antithyroid
+Neo-Mercazole 5,Carbimazole 5mg,Antithyroid
+Pregabalin,Pregabalin,Neuropathy / Anticonvulsant
+Pregaba 75,Pregabalin 75mg,Neuropathy / Anticonvulsant
+Pregabalin + Methylcobalamin,Pregabalin 75mg + Methylcobalamin 750mcg,Neuropathy
+Pregeb M 75,Pregabalin 75mg + Methylcobalamin 750mcg,Neuropathy
+Gabapentin,Gabapentin,Neuropathy / Anticonvulsant
+Gabapin 300,Gabapentin 300mg,Neuropathy / Anticonvulsant
+Methylcobalamin,Methylcobalamin (Vitamin B12),Neurological Supplement
+Neurobion Forte,Vitamin B Complex + Vitamin B12,Multivitamin
+Rejunex CD,Methylcobalamin + Alpha Lipoic Acid + Benfotiamine,Neurological Supplement
+Becosules,Vitamin B-Complex with Vitamin C,Multivitamin
+Shelcal 500,Calcium Carbonate 1250mg + Vitamin D3 250IU,Bone / Calcium Supplement
+Shelcal HD,Calcium Carbonate + Vitamin D3 500IU,Bone / Calcium Supplement
+Uprise-D3 60K,Cholecalciferol (Vitamin D3) 60000 IU,Vitamin D Supplement
+Calcirol Sachet,Cholecalciferol 60000 IU,Vitamin D Supplement
+Livogen-Z,Ferrous Fumarate + Folic Acid + Zinc,Iron Supplement
+Autrin,Ferrous Fumarate + Vitamin B12 + Folic Acid,Iron Supplement
+Supradyn,Multivitamins with Minerals and Trace Elements,Multivitamin
+Clonazepam,Clonazepam,Anxiolytic / Anticonvulsant
+Clona 0.5,Clonazepam 0.5mg,Anxiolytic / Anticonvulsant
+Clonafit 0.5,Clonazepam 0.5mg,Anxiolytic / Anticonvulsant
+Alprazolam,Alprazolam,Anxiolytic
+Restyl 0.25,Alprazolam 0.25mg,Anxiolytic
+Restyl 0.5,Alprazolam 0.5mg,Anxiolytic
+Alprax 0.5,Alprazolam 0.5mg,Anxiolytic
+Escitalopram,Escitalopram Oxalate,Antidepressant
+Nexito 10,Escitalopram 10mg,Antidepressant
+Nexito Plus,Escitalopram 5mg + Clonazepam 0.5mg,Antidepressant / Anxiolytic
+Sertraline,Sertraline Hydrochloride,Antidepressant
+Daxid 50,Sertraline 50mg,Antidepressant
+Amitriptyline,Amitriptyline Hydrochloride,Antidepressant / Neuropathic Pain
+Tryptomer 10,Amitriptyline 10mg,Antidepressant / Neuropathic Pain
+Tryptomer 25,Amitriptyline 25mg,Antidepressant / Neuropathic Pain
+Fluconazole,Fluconazole,Antifungal
+Forcan 150,Fluconazole 150mg,Antifungal
+Itraconazole,Itraconazole,Antifungal
+Candiforce 100,Itraconazole 100mg,Antifungal
+Candiforce 200,Itraconazole 200mg,Antifungal
+Terbinafine,Terbinafine Hydrochloride,Antifungal
+Tyza 250,Terbinafine 250mg,Antifungal
+Clotrimazole,Clotrimazole,Antifungal
+Candid Dusting Powder,Clotrimazole 1% w/w,Antifungal
+
