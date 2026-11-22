@@ -1,9 +1,10 @@
 """
 MedBhasha Evaluation & Safety Benchmark
-Evaluates 10 synthetic noisy prescription and diagnostic lab scenarios:
+Evaluates 14 synthetic noisy prescription and diagnostic lab scenarios:
 1. Formulary verification accuracy on misspelled/noisy drug names (RapidFuzz WRatio).
 2. Hallucination and ambiguity catch rate on non-existent / severely corrupted drug names.
 3. Deterministic lab rule classification accuracy (100% pure-Python numeric logic).
+4. Dosing guardrails: maximum daily-dose limits and duplicate active salts.
 
 Run via:
     python backend/benchmark/run_benchmark.py
@@ -27,6 +28,7 @@ from backend.schemas import (
     ExtractedMedicine,
 )
 from backend.services.verifier import (
+    check_dosing_safety,
     check_drug_interactions,
     evaluate_biomarkers,
     load_formulary,
@@ -34,7 +36,7 @@ from backend.services.verifier import (
     verify_medicines,
 )
 
-# 10 Rigorous Test Cases simulating real-world noisy clinic captures
+# 14 Rigorous Test Cases simulating real-world noisy clinic captures
 BENCHMARK_CASES: List[Dict[str, Any]] = [
     {
         "id": "TC-01",
@@ -250,6 +252,54 @@ BENCHMARK_CASES: List[Dict[str, Any]] = [
         "expected_severity": "warning",
         "expected_alert_type": "duplicate_ingredient",
     },
+    {
+        "id": "TC-13",
+        "description": "Dosing Guardrail: Paracetamol daily dose above safe maximum (hepatotoxicity)",
+        "type": "ddi",
+        "input_meds": [
+            ExtractedMedicine(
+                raw_name="Paracetamol 1000mg tab",
+                dosage="1000mg",
+                frequency_code="2-2-2",
+                morning_count=2.0,
+                afternoon_count=2.0,
+                night_count=2.0,
+                meal_timing="after_food",
+                general_purpose="Fever",
+            ),
+        ],
+        "expected_severity": "danger",
+        "expected_alert_type": "clinical_caution",
+    },
+    {
+        "id": "TC-14",
+        "description": "Dosing Guardrail: Duplicate Metformin salt across two brands",
+        "type": "ddi",
+        "input_meds": [
+            ExtractedMedicine(
+                raw_name="Glycomet 500mg",
+                dosage="500mg",
+                frequency_code="1-0-1",
+                morning_count=1.0,
+                afternoon_count=0.0,
+                night_count=1.0,
+                meal_timing="after_food",
+                general_purpose="Type-2 Diabetes",
+            ),
+            ExtractedMedicine(
+                raw_name="Metformin 500mg",
+                dosage="500mg",
+                frequency_code="1-0-1",
+                morning_count=1.0,
+                afternoon_count=0.0,
+                night_count=1.0,
+                meal_timing="after_food",
+                general_purpose="Type-2 Diabetes",
+            ),
+        ],
+        "expected_severity": "warning",
+        "expected_alert_type": "duplicate_ingredient",
+    },
 ]
 
 
@@ -355,7 +405,7 @@ def run_benchmark_suite() -> Dict[str, Any]:
             total_ddi_tests += 1
             input_meds = tc["input_meds"]
             verified_meds = verify_medicines(input_meds)
-            ddi_alerts = check_drug_interactions(verified_meds)
+            ddi_alerts = check_drug_interactions(verified_meds) + check_dosing_safety(verified_meds)
 
             match = next((a for a in ddi_alerts if a.alert_type == tc["expected_alert_type"]), None)
             passed = (match is not None) and (match.severity == tc["expected_severity"])

@@ -480,3 +480,167 @@ export function getSampleLabReportData(language = 'hi') {
   };
 }
 
+// SVG Data URI for the danger-interaction demo prescription
+export const SAMPLE_INTERACTION_IMAGE = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000" style="background:%23fdfbf7;">
+  <rect width="800" height="1000" fill="%23fdfbf7"/>
+  <rect x="25" y="25" width="750" height="950" rx="12" fill="none" stroke="%23cbd5e1" stroke-width="2"/>
+  <rect x="25" y="25" width="750" height="120" rx="12" fill="%23065f46"/>
+  <text x="60" y="70" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="%23ffffff">CITY CARE POLYCLINIC</text>
+  <text x="60" y="98" font-family="Arial, sans-serif" font-size="14" fill="%23a7f3d0">Dr. Ananya Rao, MBBS, MD (Cardiology)</text>
+  <text x="60" y="120" font-family="Arial, sans-serif" font-size="12" fill="%23d1fae5">Patient: Sunita Devi | Age: 61 F | Date: 20-Nov-2026</text>
+  <text x="60" y="185" font-family="Arial, sans-serif" font-size="15" fill="%23334155">Complaint: Knee pain with cardiac history (already on a blood thinner)</text>
+  <text x="60" y="240" font-family="Georgia, serif" font-size="44" font-weight="bold" fill="%23047857">Rx</text>
+  <text x="140" y="290" font-family="'Courier New', monospace" font-size="20" font-weight="bold" fill="%230f172a">1. Tab. ECOSPRIN 75 mg</text>
+  <text x="170" y="325" font-family="'Courier New', monospace" font-size="16" fill="%23334155">1 - 0 - 0  (Morning) [After Food] x 30 days</text>
+  <text x="170" y="348" font-family="Arial, sans-serif" font-size="13" fill="%2364748b">Purpose: Blood thinner (antiplatelet)</text>
+  <text x="140" y="410" font-family="'Courier New', monospace" font-size="20" font-weight="bold" fill="%230f172a">2. Tab. COMBIFLAM</text>
+  <text x="170" y="445" font-family="'Courier New', monospace" font-size="16" fill="%23334155">1 - 0 - 1  (Twice daily) [After Food] x 5 days</text>
+  <text x="170" y="468" font-family="Arial, sans-serif" font-size="13" fill="%2364748b">Purpose: Knee pain &amp; inflammation</text>
+  <rect x="60" y="580" width="680" height="190" rx="14" fill="%23fef2f2" stroke="%23dc2626" stroke-width="3"/>
+  <text x="90" y="625" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="%23b91c1c">CRITICAL ALERT: BLEEDING RISK</text>
+  <text x="90" y="665" font-family="Arial, sans-serif" font-size="16" fill="%23991b1b">Combiflam (Ibuprofen) + Ecosprin (Aspirin) together</text>
+  <text x="90" y="695" font-family="Arial, sans-serif" font-size="16" fill="%23991b1b">sharply increase stomach bleeding and ulcer risk.</text>
+  <text x="90" y="735" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="%237f1d1d">Action: Contact your doctor before combining these two.</text>
+  <text x="60" y="860" font-family="Arial, sans-serif" font-size="13" fill="%2364748b">Generated for MedBhasha safety-engine demonstration. Not a real prescription.</text>
+</svg>`;
+
+// Danger drug-interaction sample: blood thinner + NSAID
+export function getSampleInteractionData(language = 'hi') {
+  const languageNames = {
+    hi: 'हिंदी (Hindi)',
+    en: 'English',
+    or: 'ଓଡ଼ିଆ (Odia)',
+    bn: 'বাংলা (Bengali)',
+    ta: 'தமிழ் (Tamil)',
+  };
+
+  const spokenScripts = {
+    hi: 'सावधान। इस पर्चे में एक गंभीर दवा परस्पर क्रिया पाई गई है। दर्द की दवा कॉम्बिफ्लैम और खून पतला करने की दवा एकोस्प्रिन साथ लेने से पेट में गंभीर रक्तस्राव का खतरा है। कृपया दोनों दवाएं साथ लेने से पहले अपने डॉक्टर से तुरंत सलाह लें।',
+    en: 'Caution. A critical drug interaction was found in this prescription. Taking the pain reliever Combiflam together with the blood thinner Ecosprin sharply increases the risk of severe stomach bleeding. Please consult your doctor immediately before taking these two medicines together.',
+    or: 'ସାବଧାନ। ଏହି ପ୍ରେସକ୍ରିପସନରେ ଏକ ଗୁରୁତର ଔଷଧ ପ୍ରତିକ୍ରିୟା ଚିହ୍ନଟ ହୋଇଛି। ଯନ୍ତ୍ରଣା ନିବାରକ କମ୍ବିଫ୍ଲାମ ଏବଂ ରକ୍ତ ପତଳା କରିବା ଔଷଧ ଏକୋସ୍ପ୍ରିନ ଏକାଠି ନେଲେ ପେଟରେ ଗୁରୁତର ରକ୍ତସ୍ରାବ ହେବାର ଆଶଙ୍କା ରହିଛି। ଦୟାକରି ଡାକ୍ତରଙ୍କ ସହ ପରାମର୍ଶ କରନ୍ତୁ।',
+    bn: 'সতর্কতা। এই প্রেসক্রিপশনে একটি গুরুতর ওষুধের পারস্পরিক ক্রিয়া পাওয়া গেছে। ব্যথার ওষুধ কম্বিফ্ল্যাম এবং রক্ত পাতলা করার ওষুধ একোসপ্রিন একসাথে নিলে পেটে গুরুতর রক্তক্ষরণের ঝুঁকি বেড়ে যায়। অনুগ্রহ করে ডাক্তারের পরামর্শ নিন।',
+    ta: 'எச்சரிக்கை. இந்த மருந்துச் சீட்டில் தீவிரமான மருந்து இடைவினை கண்டறியப்பட்டுள்ளது. வலி நிவாரணி காம்பிஃபிளாம் மற்றும் இரத்தத்தை மெலிதாக்கும் யுகோஸ்ப்ரின் இரண்டையும் சேர்த்து எடுத்தால் வயிற்றில் தீவிர இரத்தப்போக்கு ஏற்படும் அபாயம் உள்ளது. மருத்துவரை அணுகவும்.',
+  };
+
+  const disclaimers = {
+    hi: 'महत्वपूर्ण सुरक्षा सूचना: यह AI व्याख्या केवल आपकी समझ और सुविधा के लिए है। किसी भी दवा, खुराक या जांच रिपोर्ट के संबंध में हमेशा अपने डॉक्टर या योग्य फार्मासिस्ट से परामर्श अवश्य लें।',
+    en: 'Important Safety Notice: This AI explanation is strictly for educational comprehension. Always verify prescription medicines, schedules, and lab test results with your treating doctor or registered pharmacist before taking any medication.',
+    or: 'ଗୁରୁତ୍ୱପୂର୍ଣ୍ଣ ସୁରକ୍ଷା ସୂଚନା: ଏହି AI ବ୍ୟାଖ୍ୟା କେବଳ ଆପଣଙ୍କ ବୁଝିବା ସୁବିଧା ପାଇଁ। କୌଣସି ଔଷଧ ସେବନ ପୂର୍ବରୁ ସର୍ବଦା ଆପଣଙ୍କ ଚିକିତ୍ସକ ଡାକ୍ତର କିମ୍ବା ଫାର୍ମାସିଷ୍ଟଙ୍କ ସହିତ ପରାମର୍ଶ କରନ୍ତୁ।',
+    bn: 'জরুরি সুরক্ষা সতর্কতা: এই এআই ব্যাখ্যা শুধুমাত্র আপনার তথ্য এবং স্পষ্ট ধারণার জন্য। ওষুধ সেবন বা যেকোনো পরিবর্তনের পূর্বে সর্বদা আপনার রেজিস্টার্ড ডাক্তার বা ফার্মাসিস্টের পরামর্শ গ্রহণ করুন।',
+    ta: 'முக்கிய பாதுகாப்பு அறிவிப்பு: இந்த AI விளக்கம் உங்கள் புரிதலுக்காக மட்டுமே வழங்கப்படுகிறது. எந்தவொரு மருந்தையும் உட்கொள்வதற்கு முன், எப்போதும் உங்கள் மருத்துவர் அல்லது அங்கீகரிக்கப்பட்ட மருந்தாளரிடம் சரிபார்த்துக் கொள்ளுங்கள்.',
+  };
+
+  return {
+    success: true,
+    filename: 'Sample_Dr_Rao_Danger_Interaction.png',
+    language: language,
+    quality_metrics: {
+      blur_variance: 188.7,
+      brightness_score: 176.2,
+      is_blurry: false,
+      is_too_dark: false,
+      is_too_bright: false,
+      quality_status: 'good',
+      warnings: [],
+    },
+    dimensions: {
+      original_width: 800,
+      original_height: 1000,
+      processed_width: 800,
+      processed_height: 1000,
+    },
+    preview_base64: SAMPLE_INTERACTION_IMAGE,
+    raw_extraction: {
+      document_type: 'prescription',
+      patient_instructions: [
+        'Patient is already on long-term antiplatelet therapy',
+        'Report any black stools or unusual bruising immediately',
+      ],
+    },
+    verification: {
+      document_type: 'prescription',
+      patient_instructions: [
+        'Patient is already on long-term antiplatelet therapy',
+        'Report any black stools or unusual bruising immediately',
+      ],
+      total_medicines: 2,
+      verified_medicines_count: 2,
+      low_confidence_medicines_count: 0,
+      flagged_biomarkers_count: 0,
+      medicines: [
+        {
+          raw_name: 'Tab. ECOSPRIN 75 mg',
+          dosage: '75mg',
+          frequency_code: '1-0-0',
+          morning_count: 1.0,
+          afternoon_count: 0.0,
+          night_count: 0.0,
+          meal_timing: 'after_food',
+          duration_days: 30,
+          general_purpose: 'Blood thinner (antiplatelet)',
+          matched_name: 'Ecosprin 75',
+          generic_composition: 'Aspirin 75mg',
+          category: 'Antiplatelet / Blood Thinner',
+          confidence_score: 98.0,
+          verification_status: 'verified',
+          warning: null,
+        },
+        {
+          raw_name: 'Tab. COMBIFLAM',
+          dosage: '400mg',
+          frequency_code: '1-0-1',
+          morning_count: 1.0,
+          afternoon_count: 0.0,
+          night_count: 1.0,
+          meal_timing: 'after_food',
+          duration_days: 5,
+          general_purpose: 'Knee pain and inflammation',
+          matched_name: 'Combiflam',
+          generic_composition: 'Ibuprofen 400mg + Paracetamol 325mg',
+          category: 'NSAID Analgesic',
+          confidence_score: 97.0,
+          verification_status: 'verified',
+          warning: null,
+        },
+      ],
+      biomarkers: [],
+      drug_interactions: [
+        {
+          severity: 'danger',
+          alert_type: 'drug_interaction',
+          medicines_involved: ['Ecosprin 75', 'Combiflam'],
+          title: 'Critical Bleeding Risk: Blood Thinner + NSAID',
+          description: 'Ecosprin 75 (Aspirin) is an antiplatelet blood thinner, while Combiflam contains Ibuprofen, an NSAID. Taking them together sharply increases the risk of stomach bleeding and ulceration, and can reduce the cardioprotective effect of low-dose aspirin.',
+          action_recommendation: 'Do not take these two medicines together. Contact your prescribing doctor immediately to discuss a safer pain-relief alternative such as Paracetamol.',
+        },
+      ],
+    },
+    localized_guidance: {
+      language: language,
+      language_name: languageNames[language] || 'Hindi',
+      spoken_summary_script: spokenScripts[language] || spokenScripts['hi'],
+      medicine_schedules: [
+        {
+          medicine_name: 'Ecosprin 75 (Aspirin 75mg)',
+          schedule_text: language === 'hi' ? 'सुबह 1 गोली' : '1 tablet in the morning',
+          food_instruction: language === 'hi' ? 'भोजन के बाद (After Food)' : 'After meals',
+          special_instructions: 'Blood thinner - do not stop without doctor advice',
+        },
+        {
+          medicine_name: 'Combiflam (Ibuprofen + Paracetamol)',
+          schedule_text: language === 'hi' ? 'सुबह 1 गोली और रात को 1 गोली' : '1 tablet morning and 1 at night',
+          food_instruction: language === 'hi' ? 'भोजन के बाद (After Food)' : 'After meals',
+          special_instructions: 'DANGER with Ecosprin - confirm safer alternative with doctor',
+        },
+      ],
+      biomarker_explanations: [],
+      doctor_questions: [
+        'Can you prescribe a safer pain reliever instead of Combiflam while I am on Ecosprin?',
+        'Should I watch for black stools or unusual bruising as a bleeding warning sign?',
+      ],
+      safety_disclaimer: disclaimers[language] || disclaimers['hi'],
+    },
+    spoken_summary_script: spokenScripts[language] || spokenScripts['hi'],
+  };
+}
+

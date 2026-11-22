@@ -620,17 +620,189 @@ def check_drug_interactions(medicines: List[VerifiedMedicine]) -> List[DrugInter
     return alerts
 
 
+# ============================================================================
+# 4. Dosing Safety Guardrail (Daily-Dose Limit & Duplicate Active Salt)
+# ============================================================================
+
+# Conservative maximum recommended daily dose (in mg) for common oral actives.
+# Applied ONLY when the prescription strength is explicitly numeric in mg, so
+# combination products and unspecified strengths are never falsely flagged.
+MAX_DAILY_DOSE_MG: Dict[str, float] = {
+    "paracetamol": 4000.0,
+    "acetaminophen": 4000.0,
+    "ibuprofen": 2400.0,
+    "diclofenac": 150.0,
+    "aceclofenac": 200.0,
+    "naproxen": 1000.0,
+    "aspirin": 4000.0,
+    "nimesulide": 200.0,
+    "mefenamic": 1000.0,
+    "etoricoxib": 120.0,
+}
+
+# Active salts that are dangerous to duplicate across brands. Paracetamol is
+# intentionally excluded here because the dedicated brand-keyword guardrail in
+# check_drug_interactions() already covers every paracetamol product via its
+# generic composition, avoiding a duplicate alert for the same pair.
+DUPLICATE_ACTIVE_KEYWORDS: List[str] = [
+    "ibuprofen", "aspirin", "diclofenac", "aceclofenac", "naproxen",
+    "nimesulide", "metformin", "glimepiride", "gliclazide", "glibenclamide",
+    "telmisartan", "amlodipine", "atorvastatin", "pantoprazole", "domperidone",
+    "omeprazole", "levothyroxine", "thyroxine",
+]
+
+
+def _parse_strength_mg(dosage: str) -> Optional[float]:
+    """Parses a numeric strength in milligrams from a dosage string."""
+    if not dosage:
+        return None
+    text = str(dosage).strip().lower().replace(" ", "")
+    match = re.match(r"^(\d+(?:\.\d+)?)mg$", text)
+    if match:
+        return float(match.group(1))
+    match = re.match(r"^(\d+(?:\.\d+)?)$", text)
+    if match:
+        return float(match.group(1))
+    return None
+
+
+def _actives_in_text(text: str, keywords: List[str]) -> List[str]:
+    """Returns recognized active salts mentioned in a drug name/composition."""
+    if not text:
+        return []
+    low = text.lower()
+    return [
+        active
+        for active in keywords
+        if re.search(r"(?<![a-z])" + re.escape(active) + r"(?![a-z])", low)
+    ]
+
+
+def check_dosing_safety(medicines: List[VerifiedMedicine]) -> List[DrugInteractionAlert]:
+    """
+    Deterministic dosing guardrails:
+    1. Maximum daily dose exceedance for common actives (hepatotoxicity / NSAID burden).
+    2. Duplicate active salt across different brands (accidental double dosing).
+    3. Implausibly high per-dose tablet counts (likely handwriting misread).
+    """
+    alerts: List[DrugInteractionAlert] = []
+    if not medicines:
+        return alerts
+
+    # 1. Maximum daily dose evaluation
+    for med in medicines:
+        composition = med.generic_composition or ""
+        name_text = f"{med.matched_name or ''} {med.raw_name or ''}"
+        dose_keywords = list(MAX_DAILY_DOSE_MG.keys())
+        actives = _actives_in_text(composition, dose_keywords) or _actives_in_text(name_text, dose_keywords)
+        strength = _parse_strength_mg(med.dosage)
+        daily_count = (med.morning_count or 0) + (med.afternoon_count or 0) + (med.night_count or 0)
+        if not actives or strength is None or daily_count <= 0:
+            continue
+        daily_dose = strength * daily_count
+        for active in actives:
+            limit = MAX_DAILY_DOSE_MG.get(active)
+            if limit and daily_dose > limit:
+                alerts.append(
+                    DrugInteractionAlert(
+                        severity="danger",
+                        alert_type="clinical_caution",
+                        medicines_involved=[med.matched_name or med.raw_name],
+                        title=(
+                            f"Maximum Daily Dose Exceeded: {active.title()} "
+                            f"(~{daily_dose:.0f} mg/day)"
+                        ),
+                        description=(
+                            f"{med.matched_name or med.raw_name} provides about {daily_dose:.0f} mg of "
+                            f"{active.title()} per day, above the commonly recommended maximum of "
+                            f"{limit:.0f} mg/day. Excess dosing increases the risk of liver, kidney, or "
+                            "gastrointestinal toxicity."
+                        ),
+                        action_recommendation=(
+                            "Do not take this dose without explicit confirmation from your prescribing "
+                            "doctor or pharmacist."
+                        ),
+                    )
+                )
+                break
+
+    # 2. Duplicate active salt across different brands
+    seen_actives: Dict[str, List[str]] = {}
+    for med in medicines:
+        composition = med.generic_composition or ""
+        label = med.matched_name or med.raw_name
+        for active in _actives_in_text(composition, DUPLICATE_ACTIVE_KEYWORDS):
+            bucket = seen_actives.setdefault(active, [])
+            if label not in bucket:
+                bucket.append(label)
+    for active, labels in seen_actives.items():
+        if len(labels) >= 2:
+            alerts.append(
+                DrugInteractionAlert(
+                    severity="warning",
+                    alert_type="duplicate_ingredient",
+                    medicines_involved=labels,
+                    title=f"Duplicate Active Salt: {active.title()} prescribed twice",
+                    description=(
+                        f"Two or more prescribed products ({', '.join(labels)}) contain {active.title()}. "
+                        "Taking them together can unintentionally double the dose and increase toxicity risk."
+                    ),
+                    action_recommendation=(
+                        "Ask your pharmacist whether both products are required, or whether one should be stopped."
+                    ),
+                )
+            )
+
+    # 3. Implausibly high per-dose tablet count
+    for med in medicines:
+        counts = [med.morning_count or 0, med.afternoon_count or 0, med.night_count or 0]
+        if any(count > 4 for count in counts):
+            alerts.append(
+                DrugInteractionAlert(
+                    severity="warning",
+                    alert_type="clinical_caution",
+                    medicines_involved=[med.matched_name or med.raw_name],
+                    title=f"Unusually High Per-Dose Count: {med.matched_name or med.raw_name}",
+                    description=(
+                        f"A single dose lists {max(counts):.0f} units, which is atypical for this medicine. "
+                        "This may be a misread of the prescription handwriting."
+                    ),
+                    action_recommendation=(
+                        "Confirm the exact number of tablets per dose with your pharmacist before taking it."
+                    ),
+                )
+            )
+
+    return alerts
+
+
+def _dedupe_alerts(alerts: List[DrugInteractionAlert]) -> List[DrugInteractionAlert]:
+    """Removes exact duplicate alerts while preserving severity ordering."""
+    seen = set()
+    deduped: List[DrugInteractionAlert] = []
+    for alert in alerts:
+        key = (alert.alert_type, alert.severity, alert.title, tuple(sorted(set(alert.medicines_involved))))
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(alert)
+    return deduped
+
+
 def verify_document_extraction(extraction: DocumentExtraction) -> VerifiedDocumentResult:
     """
     Executes the hybrid verification pipeline on extracted medical document data:
     1. Verifies medicines against the Indian Formulary via RapidFuzz.
     2. Deterministically evaluates lab biomarkers via pure Python numeric logic.
     3. Checks for dangerous Drug-Drug Interactions and duplicate active ingredients.
-    4. Produces audit metrics and clinical safety warnings.
+    4. Applies dosing guardrails (daily-dose limits, duplicate salts, per-dose counts).
+    5. Produces audit metrics and clinical safety warnings.
     """
     verified_meds = verify_medicines(extraction.medicines)
     evaluated_bios = evaluate_biomarkers(extraction.biomarkers)
-    ddi_alerts = check_drug_interactions(verified_meds)
+    ddi_alerts = _dedupe_alerts(
+        check_drug_interactions(verified_meds) + check_dosing_safety(verified_meds)
+    )
 
     total_meds = len(verified_meds)
     verified_count = sum(1 for m in verified_meds if m.verification_status == "verified")

@@ -37,7 +37,7 @@ flowchart TD
     end
 
     subgraph AI_Inference["🧠 Multimodal Extraction"]
-        G["Google Gemini 2.5 Flash (Structured Pydantic Output)"]
+        G["Google Gemini Flash (Structured Pydantic Output, Model Fallback Chain)"]
     end
 
     subgraph Verification["🛡️ Deterministic Safety Guardrails"]
@@ -69,17 +69,18 @@ flowchart TD
 | Guardrail Layer | Technology | Problem Solved | Clinical Safety Guarantee |
 |---|---|---|---|
 | **1. Glare & Noise Defense** | OpenCV CLAHE + Non-Local Means Denoising | Eliminates hospital bulb reflection, phone sensor grain, and paper folds. | Measures Laplacian variance (`cv2.Laplacian.var()`); alerts user if image is blurry (< 100) before inference. |
-| **2. Zero-Hallucination Extraction** | Gemini 2.5 Flash + Pydantic Schema | Forces strict transcription of visible clinical text without inventing drugs. | Strict system prompt forbidding clinical guesswork or speculation. |
+| **2. Zero-Hallucination Extraction** | Gemini Flash + Pydantic Schema | Forces strict transcription of visible clinical text without inventing drugs. | Strict system prompt forbidding clinical guesswork or speculation; automatic model fallback if a model is unavailable. |
 | **3. Formulary Verification** | RapidFuzz `WRatio` against 250+ Indian Drugs | Normalizes typos, spelling variants, and doctor shorthand (`Dolo-650`, `Pan-D`, `Augmentin`). | Match score $\ge 80\%$ marked `verified`; match $< 80\%$ triggers amber/red pharmacist confirmation banner. |
 | **4. Deterministic Lab Rule Engine** | Pure-Python Numeric Thresholds | Determines if lab readings (`HbA1c`, `FBS`, `TSH`, etc.) are high, normal, or low. | **100% Rule Consistency: Zero LLM calculation permitted for clinical status.** |
 | **5. DDI & Active Ingredient Guardrail** | Pharmacological Interaction Rules | Catches hazardous drug combinations and duplicate active salts (e.g., Paracetamol multi-brand toxicity, Blood Thinner + NSAID bleeding hazards). | High-contrast visual banners and specific clinical recommendations for pharmacist consultation. |
-| **6. Offline PWA Resiliency** | Service Worker + `localStorage` | Allows patients in rural/low-connectivity areas to review past scans. | Decoded schedules and synthesized audio cached offline; browser `SpeechSynthesis` fallback. |
+| **6. Dosing Safety Guardrails** | Deterministic mg/day Rules | Flags maximum daily-dose exceedance (e.g., paracetamol hepatotoxicity, NSAID burden), duplicate active salts across brands, and implausibly high per-dose counts. | Conservative, transparent thresholds; combination products and unspecified strengths are never falsely flagged. |
+| **7. Offline PWA Resiliency** | Service Worker + `localStorage` | Allows patients in rural/low-connectivity areas to review past scans. | Decoded schedules and synthesized audio cached offline; browser `SpeechSynthesis` fallback. |
 
 ---
 
 ## 📊 Evaluation & Safety Benchmark Results
 
-The automated benchmark suite (`backend/benchmark/run_benchmark.py`) tests 12 synthetic noisy prescriptions, corrupted handwriting scribbles, dangerous drug interactions, and abnormal lab readings:
+The automated benchmark suite (`backend/benchmark/run_benchmark.py`) tests 14 synthetic noisy prescriptions, corrupted handwriting scribbles, dangerous drug interactions, dosing guardrails, and abnormal lab readings:
 
 ```bash
 python backend/benchmark/run_benchmark.py
@@ -101,14 +102,16 @@ python backend/benchmark/run_benchmark.py
 | **TC-10** | Lab Numeric Rule | `Serum TSH: 6.8 uIU/mL` | TSH -> HIGH | TSH -> HIGH | ✅ PASS | Range: 0.40 - 4.50 uIU/mL |
 | **TC-11** | DDI & Duplicate Guard | `Ecosprin 75 + Combiflam` | DANGER: Critical Bleeding Risk | DANGER (drug_interaction) | ✅ PASS | Blood Thinner + NSAID interaction alert |
 | **TC-12** | DDI & Duplicate Guard | `Dolo 650 + Combiflam` | WARNING: Duplicate Paracetamol | WARNING (duplicate_ingredient) | ✅ PASS | Hepatotoxicity active ingredient alert |
+| **TC-13** | Dosing Guardrail | `Paracetamol 1000mg, 2-2-2` | DANGER: Max Daily Dose Exceeded | DANGER (clinical_caution) | ✅ PASS | ~6000 mg/day > 4000 mg/day safe limit |
+| **TC-14** | Dosing Guardrail | `Glycomet 500 + Metformin 500` | WARNING: Duplicate Active Salt | WARNING (duplicate_ingredient) | ✅ PASS | Same salt prescribed under two brands |
 
 ### Metrics Summary
-- **Overall Pass Rate**: `12/12 (100.0%)`
+- **Overall Pass Rate**: `14/14 (100.0%)`
 - **Fuzzy Prescription Matching Accuracy**: `100.0%`
 - **Hallucination & Ambiguity Defense Catch Rate**: `100.0%`
 - **Deterministic Lab Classification Precision**: `100.0%`
-- **DDI & Active Ingredient Safety Precision**: `100.0%`
-- **Evaluation Latency**: `< 20 ms`
+- **DDI, Dosing & Active Ingredient Safety Precision**: `100.0%`
+- **Evaluation Latency**: `< 50 ms`
 
 ---
 
@@ -123,13 +126,13 @@ medbhasha/
 │   ├── requirements.txt         # Core dependencies
 │   ├── schemas.py               # Pydantic structured output models
 │   ├── benchmark/
-│   │   └── run_benchmark.py     # 10-test clinical evaluation suite
+│   │   └── run_benchmark.py     # 14-test clinical evaluation suite
 │   ├── data/
 │   │   └── indian_medicines.csv # Seeded with 250+ Indian pharmaceutical drugs & generic salts
 │   └── services/
 │       ├── __init__.py
 │       ├── image_processor.py   # OpenCV CLAHE, Non-Local Means Denoising, blur & glare metrics
-│       ├── gemini_extractor.py  # google-genai SDK (gemini-2.5-flash) structured extraction
+│       ├── gemini_extractor.py  # google-genai SDK (default gemini-3.5-flash-lite) structured extraction
 │       ├── verifier.py          # RapidFuzz formulary matching & pure-Python lab rule engine
 │       ├── localizer.py         # Vernacular translation (en, hi, or, bn, ta), doctor questions
 │       └── tts_service.py       # Microsoft Edge Neural TTS voice streaming
@@ -201,6 +204,17 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ---
 
+## 🔒 Privacy, Data Handling & Safety
+
+- **No server-side storage of medical records.** Uploaded images/PDFs are processed in memory for a single request and are never written to disk or a database by the backend.
+- **Browser-local history only.** Saved scans live in the user's own `localStorage` and can be cleared from the app at any time.
+- **API keys stay server-side.** `GEMINI_API_KEY` is read from the backend environment and is never shipped to the browser.
+- **Restricted CORS.** The API accepts browser calls only from the production frontend, Vercel preview deployments, and localhost — configurable via `CORS_ORIGINS` / `CORS_ORIGIN_REGEX`.
+- **No account or identity required.** The demo needs no login, phone number, or personal identifiers.
+- **Safety disclaimer.** MedBhasha is a comprehension aid, not a diagnostic or prescribing system. Every extracted medicine, dose, and lab value should be confirmed with a licensed doctor or pharmacist before any clinical decision.
+
+---
+
 ## 🚢 Deployment Guide
 
 ### Deploy Backend (Hugging Face Spaces / Render)
@@ -220,7 +234,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ## 🤝 Hackathon & Presentation Highlights
 
-- ⚡ **Zero-Friction Evaluation**: Includes **Two 1-Click Sample Demo Buttons** (*"Load Sample Prescription"* and *"Load Sample Lab Report"*) with realistic medical documents and complete localized guidance so judges can evaluate the app immediately without uploading personal files.
+- ⚡ **Zero-Friction Evaluation**: Includes **Three 1-Click Sample Demo Buttons** (*"Load Sample Prescription"*, *"Load Sample Lab Report"*, and *"Load Danger Interaction Demo"*) with realistic medical documents and complete localized guidance so judges can evaluate the app immediately without uploading personal files — the third button deliberately triggers a critical bleeding-risk DDI between Ecosprin and Combiflam.
 - 🛡️ **DDI & Active Ingredient Safety Guardrail**: Clinical safety engine detects hazardous interactions (e.g., blood thinners + NSAIDs) and duplicate active ingredients (e.g., accidental paracetamol overdose) with actionable guidance.
 - 🔊 **Voice Accessibility**: Real-time neural audio playback for elderly or low-literacy patients who cannot read printed text across 5 Indian languages.
 - 📱 **1-Click WhatsApp Care Schedule Share**: Instantly share decoded medicine dosages, morning/afternoon/night timings, and lab warnings with family caregivers via WhatsApp.

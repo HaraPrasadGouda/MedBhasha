@@ -53,8 +53,10 @@ const MedBhashaLogo = ({ className = "h-11 w-11" }) => (
 import { 
   SAMPLE_PRESCRIPTION_IMAGE, 
   SAMPLE_LAB_REPORT_IMAGE,
+  SAMPLE_INTERACTION_IMAGE,
   getSamplePrescriptionData, 
-  getSampleLabReportData 
+  getSampleLabReportData,
+  getSampleInteractionData
 } from './sampleData.js';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
@@ -89,7 +91,7 @@ const VERNACULAR_LANGUAGES = [
 
 const PROCESSING_STEPS = [
   { id: 1, title: 'Enhancing image contrast', subtitle: 'OpenCV CLAHE & Denoising' },
-  { id: 2, title: 'Extracting medical fields', subtitle: 'Gemini 2.5 Flash Structured Vision' },
+  { id: 2, title: 'Extracting medical fields', subtitle: 'Gemini Structured Vision & OCR' },
   { id: 3, title: 'Verifying against drug & lab rules', subtitle: 'RapidFuzz Formulary & Deterministic Rules' },
   { id: 4, title: 'Generating regional guidance', subtitle: 'Vernacular Translation & Edge Neural TTS' },
 ];
@@ -295,6 +297,26 @@ export default function App() {
     setIsProcessing(false);
   };
 
+  const handleLoadSampleInteraction = async () => {
+    setAnalysisError(null);
+    setIsProcessing(true);
+    setProcessingStep(1);
+    stopAudio();
+    setSelectedFile({ name: 'Sample_Dr_Rao_Danger_Interaction.png', size: 156000 });
+    setOriginalPreview(SAMPLE_INTERACTION_IMAGE);
+
+    for (let step = 1; step <= 4; step++) {
+      setProcessingStep(step);
+      await delay(400);
+    }
+
+    const sample = getSampleInteractionData(selectedLanguage);
+    setAnalysisResult(sample);
+    setAnalysisSource('sample_interaction');
+    saveScanToLocalStorage(sample, 'sample_interaction');
+    setIsProcessing(false);
+  };
+
   // Audio TTS playback handler with window.speechSynthesis fallback
   const handleToggleAudio = async () => {
     if (isPlayingAudio) {
@@ -389,6 +411,10 @@ export default function App() {
     }
     if (analysisSource === 'sample_lab') {
       setAnalysisResult(getSampleLabReportData(langCode));
+      return;
+    }
+    if (analysisSource === 'sample_interaction') {
+      setAnalysisResult(getSampleInteractionData(langCode));
       return;
     }
 
@@ -577,7 +603,7 @@ export default function App() {
               Understand Your Prescription in Your Mother Tongue
             </h2>
             <p className="mt-1.5 text-emerald-100 text-xs sm:text-sm leading-relaxed">
-              Upload handwritten doctor notes or pathology lab reports. MedBhasha cleans phone camera glare with OpenCV CLAHE, verifies medicines against 150+ Indian formulary drugs, and checks lab values using pure Python numeric rules.
+              Upload handwritten doctor notes or pathology lab reports. MedBhasha cleans phone camera glare with OpenCV CLAHE, verifies medicines against 250+ Indian formulary drugs, and checks lab values using pure Python numeric rules.
             </p>
           </div>
           <div className="absolute -right-6 -bottom-8 opacity-10 pointer-events-none">
@@ -649,6 +675,13 @@ export default function App() {
               >
                 <FileCheck className="h-4 w-4 text-teal-600" />
                 Load Sample Lab Report
+              </button>
+              <button
+                onClick={handleLoadSampleInteraction}
+                className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-300 transition-colors shadow-sm active:scale-95"
+              >
+                <AlertTriangle className="h-4 w-4 text-rose-600" />
+                Load Danger Interaction Demo
               </button>
             </div>
           </div>

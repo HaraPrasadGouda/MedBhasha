@@ -62,9 +62,28 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# CORS: allow the production frontend, Vercel preview deployments, and local dev only.
+_DEFAULT_CORS_ORIGINS = (
+    "https://med-bhasha.vercel.app,"
+    "http://localhost:5173,"
+    "http://127.0.0.1:5173,"
+    "http://localhost:8000,"
+    "http://127.0.0.1:8000"
+)
+CORS_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv("CORS_ORIGINS", _DEFAULT_CORS_ORIGINS).split(",")
+    if origin.strip()
+]
+CORS_ORIGIN_REGEX = os.getenv(
+    "CORS_ORIGIN_REGEX",
+    r"https://med-bhasha[a-z0-9-]*\.vercel\.app|http://(localhost|127\.0\.0\.1):\d+",
+)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=CORS_ORIGINS,
+    allow_origin_regex=CORS_ORIGIN_REGEX,
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
